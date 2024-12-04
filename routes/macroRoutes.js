@@ -38,7 +38,7 @@ router.post(
 ); //OROTGA EL TOKEN DE AUTORIZACION PARA HACER PETICIONES
 router.get("/credencial/", Oauth, credencial); // VERIFICA EXISTENCIA DE USUARIO PARA DAR TOKEN DE INGRESO Y DATOS
 router.get("/obtenerDatosCarnetSanidad/", Oauth, obtenerDatosCarnetSanidad); // CARNET DE SANIDAD DE USUARIO DEL CIDITUC
-router.post("/altaUsuario", agregarUsuario); // MIGRACION DE USUARIO YA REGISTRADO CON OTRO METODO (NO CIDITUC)
+router.post("/altaUsuario", agregarUsuario); // MIGRACION DE USUARIO YA REGISTRADO CON OTRO METODO (NO CIDITUC) NO SE ENVIA EMAIL DE VALIDACION
 router.post("/registro", registroUsuario); // REGRISTRAR USUARIO Y ENVIAR EMAIL DE VALIDACION
 router.put("/validar", validarUsuario); // VALIDAR USUARIO POR CODIGO ENVIADO AL EMAIL
 router.put("/restablecerClave", restablecerClave); // RESTABLECER CONTRASEÑA
