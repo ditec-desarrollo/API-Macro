@@ -224,7 +224,15 @@ const listarReclamosCiudadano = async (req, res) => {
   console.log("Conectado a MySQL");
 
   try {
-    let sqlQuery = ` SELECT r.id_reclamo, tr.nombre_treclamo, r.asunto, r.direccion, r.apellido_nombre, r.fecha_hora_inicio, cr.nombre_categoria,(SELECT detalle_movi FROM mov_reclamo WHERE id_movi = (SELECT MAX(id_movi) FROM mov_reclamo WHERE id_reclamo = r.id_reclamo)) as estado_reclamo FROM reclamo_prueba r JOIN categoria_reclamo cr ON r.id_categoria = cr.id_categoria JOIN tipo_reclamo tr ON r.id_treclamo = tr.id_treclamo WHERE `;
+    let sqlQuery = `SELECT r.id_reclamo, tr.nombre_treclamo, r.asunto, r.direccion, r.apellido_nombre, r.fecha_hora_inicio, cr.nombre_categoria,(
+  SELECT e.nombre_estado 
+  FROM mov_reclamo_prueba m 
+  LEFT JOIN estado_reclamo e ON m.id_estado = e.id_estado
+  WHERE m.id_movi = ( SELECT MAX(id_movi) FROM mov_reclamo_prueba WHERE id_reclamo = r.id_reclamo)LIMIT 1) AS estado_reclamo
+  FROM reclamo_prueba r
+  JOIN categoria_reclamo cr ON r.id_categoria = cr.id_categoria
+  JOIN tipo_reclamo tr ON r.id_treclamo = tr.id_treclamo
+  WHERE `;
 
     if (cuit && telefono) {
       sqlQuery += "r.cuit = ? AND r.telefono LIKE CONCAT('%', ?, '%')";
