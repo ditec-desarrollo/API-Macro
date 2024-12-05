@@ -25,10 +25,11 @@ app.use("/macro", macroRoutes);
 
 
 // const options = {
-//     key: fs.readFileSync('./scfg0cbqs'),
-//     cert: fs.readFileSync('./scfg0cbqs'),
-//     //ca: fs.readFileSync('/opt/psa/var/certificates/scfqdiDyQ') // si tienes un archivo CA bundle
-//   };
+//   key: fs.readFileSync('./scfx0vp99'),
+// cert: fs.readFileSync('./scfx0vp99'),
+//   //ca: fs.readFileSync('/opt/psa/var/certificates/scfqdiDyQ') // si tienes un archivo CA bundle
+// };
+
 
 //   https.createServer(options, app).listen(5000, () => {
 //     console.log(`server listening on port 5000`);

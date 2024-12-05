@@ -224,7 +224,15 @@ const listarReclamosCiudadano = async (req, res) => {
   console.log("Conectado a MySQL");
 
   try {
-    let sqlQuery = ` SELECT r.id_reclamo, tr.nombre_treclamo, r.asunto, r.direccion, r.apellido_nombre, r.fecha_hora_inicio, cr.nombre_categoria,(SELECT detalle_movi FROM mov_reclamo WHERE id_movi = (SELECT MAX(id_movi) FROM mov_reclamo WHERE id_reclamo = r.id_reclamo)) as estado_reclamo FROM reclamo_prueba r JOIN categoria_reclamo cr ON r.id_categoria = cr.id_categoria JOIN tipo_reclamo tr ON r.id_treclamo = tr.id_treclamo WHERE `;
+    let sqlQuery = `SELECT r.id_reclamo, tr.nombre_treclamo, r.asunto, r.direccion, r.apellido_nombre, r.fecha_hora_inicio, cr.nombre_categoria,(
+  SELECT e.nombre_estado 
+  FROM mov_reclamo_prueba m 
+  LEFT JOIN estado_reclamo e ON m.id_estado = e.id_estado
+  WHERE m.id_movi = ( SELECT MAX(id_movi) FROM mov_reclamo_prueba WHERE id_reclamo = r.id_reclamo)LIMIT 1) AS estado_reclamo
+  FROM reclamo_prueba r
+  JOIN categoria_reclamo cr ON r.id_categoria = cr.id_categoria
+  JOIN tipo_reclamo tr ON r.id_treclamo = tr.id_treclamo
+  WHERE `;
 
     if (cuit && telefono) {
       sqlQuery += "r.cuit = ? AND r.telefono LIKE CONCAT('%', ?, '%')";
@@ -338,20 +346,20 @@ const buscarReclamoPorId = async (req, res) => {
   console.log(req.query.id_reclamo);
   try {
     let sqlQuery =
-      "SELECT r.id_reclamo, tr.nombre_treclamo, r.asunto, r.direccion, r.apellido_nombre, r.fecha_hora_inicio, cr.nombre_categoria FROM reclamo_prueba r JOIN categoria_reclamo cr ON r.id_categoria = cr.id_categoria JOIN tipo_reclamo tr ON r.id_treclamo = tr.id_treclamo WHERE r.id_reclamo = ? ";
+      "SELECT r.id_reclamo, o.nombre_oreclamo AS origen_reclamo, c.nombre_categoria AS categoria, t.corto_treclamo AS tipo_reclamo,  t.tiempo AS tiempo_estimado, r.apellido_nombre, r.fecha_hora_inicio, r.asunto,  r.direccion, r.coorde1 AS longitud, r.coorde2 AS latitud, p.nombre_prioridad AS prioridad_resolucion  FROM reclamo_prueba r LEFT JOIN categoria_reclamo c ON r.id_categoria = c.id_categoria LEFT JOIN tipo_reclamo t ON r.id_treclamo = t.id_treclamo LEFT JOIN origen_reclamo o ON r.id_oreclamo = o.id_oreclamo LEFT JOIN prioridad_reclamo p ON r.id_prioridad = p.id_prioridad WHERE r.id_reclamo = ?";
 
     const [reclamo] = await connection.execute(sqlQuery, [id_reclamo]);
 
     if (reclamo.length > 0) {
       const detalleSqlQuery =
-        "SELECT detalle_movi as estado_reclamo FROM mov_reclamo WHERE id_movi = (SELECT MAX(id_movi) FROM mov_reclamo WHERE id_reclamo = ?) AND id_reclamo = ?";
+        "SELECT m.id_estado, e.nombre_estado FROM mov_reclamo_prueba m LEFT JOIN estado_reclamo e ON m.id_estado = e.id_estado WHERE m.id_movi = (SELECT MAX(id_movi) FROM mov_reclamo_prueba WHERE id_reclamo = ?)";
       const [detalleMovimiento] = await connection.execute(detalleSqlQuery, [
-        id_reclamo,
         id_reclamo,
       ]);
 
+      console.log(detalleMovimiento);
       if (detalleMovimiento.length > 0) {
-        reclamo[0].estado_reclamo = detalleMovimiento[0].estado_reclamo;
+        reclamo[0].estado_reclamo = detalleMovimiento[0].nombre_estado;
       } else {
         reclamo[0].estado_reclamo = "Estado no encontrado";
       }
@@ -950,6 +958,7 @@ const validarEmpleado = async (cuil) => {
 // };
 
 const agregarUsuario = async (req, res) => {
+  //PUSH CUANDO SE LOGUEA CON OTRO METODO NO CIDITUC
   let connection;
   try {
     const {
