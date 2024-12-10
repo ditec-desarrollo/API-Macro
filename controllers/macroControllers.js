@@ -20,8 +20,9 @@ const moment = require("moment-timezone");
 const nodemailer = require("nodemailer");
 
 const obtenerCategorias = async (req, res) => {
-  const connection = await conectarMacroMySql();
+  let connection;
   try {
+    connection = await conectarMacroMySql();
     console.log("Conectado a MySQL");
 
     const [results, fields] = await connection.execute(
@@ -46,8 +47,9 @@ const obtenerCategorias = async (req, res) => {
 };
 
 const obtenerTiposDeReclamoPorCategoria = async (req, res) => {
-  const connection = await conectarMacroMySql();
+  let connection;
   try {
+    connection = await conectarMacroMySql();
     const id_categoria = req.query.id_categoria;
     console.log("Conectado a MySQL");
 
@@ -75,8 +77,9 @@ const obtenerTiposDeReclamoPorCategoria = async (req, res) => {
 };
 
 const ingresarReclamo = async (req, res) => {
-  const connection = await conectarMacroMySql();
+  let connection;
   try {
+    connection = await conectarMacroMySql();
     const {
       id_categoria,
       id_treclamo,
@@ -220,10 +223,11 @@ const ingresarReclamo = async (req, res) => {
 const listarReclamosCiudadano = async (req, res) => {
   const cuit = req.query.cuit;
   const telefono = req.query.telefono;
-  const connection = await conectarMacroMySql();
-  console.log("Conectado a MySQL");
+  let connection;
 
   try {
+    connection = await conectarMacroMySql();
+    console.log("Conectado a MySQL");
     let sqlQuery = `SELECT r.id_reclamo, tr.nombre_treclamo, r.asunto, r.direccion, r.apellido_nombre, r.fecha_hora_inicio, cr.nombre_categoria,(
   SELECT e.nombre_estado 
   FROM mov_reclamo_prueba m 
@@ -293,9 +297,10 @@ const listarReclamosCiudadano = async (req, res) => {
 };
 
 const obtenerImagenes = async (idReclamo) => {
-  const ftpClient = await conectarFTPCiudadano();
+  let ftpClient;
 
   try {
+    ftpClient = await conectarFTPCiudadano();
     const remoteDirectory = "/Fotos/";
     const regex = new RegExp(`^${idReclamo}_\\d+\\.\\w+$`);
 
@@ -341,10 +346,11 @@ const obtenerImagenes = async (idReclamo) => {
 
 const buscarReclamoPorId = async (req, res) => {
   const id_reclamo = req.query.id_reclamo;
-  const connection = await conectarMacroMySql();
-  console.log("Conectado a MySQL");
-  console.log(req.query.id_reclamo);
+  let connection;
   try {
+    connection = await conectarMacroMySql();
+    console.log("Conectado a MySQL");
+    console.log(req.query.id_reclamo);
     let sqlQuery =
       "SELECT r.id_reclamo, o.nombre_oreclamo AS origen_reclamo, c.nombre_categoria AS categoria, t.corto_treclamo AS tipo_reclamo,  t.tiempo AS tiempo_estimado, r.apellido_nombre, r.fecha_hora_inicio, r.asunto,  r.direccion, r.coorde1 AS longitud, r.coorde2 AS latitud, p.nombre_prioridad AS prioridad_resolucion  FROM reclamo_prueba r LEFT JOIN categoria_reclamo c ON r.id_categoria = c.id_categoria LEFT JOIN tipo_reclamo t ON r.id_treclamo = t.id_treclamo LEFT JOIN origen_reclamo o ON r.id_oreclamo = o.id_oreclamo LEFT JOIN prioridad_reclamo p ON r.id_prioridad = p.id_prioridad WHERE r.id_reclamo = ?";
 
@@ -382,8 +388,9 @@ const buscarReclamoPorId = async (req, res) => {
 };
 
 const obtenerTurnosDisponiblesPorDia = async (req, res) => {
-  const connection = await conectarDBTurnos();
+  let connection;
   try {
+    connection = await conectarDBTurnos();
     console.log("Conectado a MySQL");
 
     let sqlQuery = `CALL api_obtenerturnospordia(?)`;
@@ -391,7 +398,7 @@ const obtenerTurnosDisponiblesPorDia = async (req, res) => {
 
     await connection.end();
     [
-      results[0] > 0
+      results[0].length > 0
         ? res.status(200).json(results[0])
         : res.status(404).json({ message: "No hay turnos disponibles" }),
     ];
@@ -409,8 +416,9 @@ const obtenerTurnosDisponiblesPorDia = async (req, res) => {
 };
 
 const obtenerTurnosDisponiblesPorHora = async (req, res) => {
-  const connection = await conectarDBTurnos();
+  let connection;
   try {
+    connection = await conectarDBTurnos();
     const fecha_solicitada = req.query.fecha_solicitada;
 
     console.log("Conectado a MySQL");
@@ -423,7 +431,7 @@ const obtenerTurnosDisponiblesPorHora = async (req, res) => {
     ]);
     await connection.end();
     [
-      results[0] > 0
+      results[0].length > 0
         ? res.status(200).json(results[0])
         : res.status(404).json({ message: "No hay turnos disponibles" }),
     ];
@@ -441,8 +449,9 @@ const obtenerTurnosDisponiblesPorHora = async (req, res) => {
 };
 
 const existeTurno = async (req, res) => {
-  const connection = await conectarDBTurnos();
+  let connection;
   try {
+    connection = await conectarDBTurnos();
     const cuil = req.query.cuil;
     // console.log(cuil);
     console.log("Conectado a MySQL");
@@ -466,8 +475,9 @@ const existeTurno = async (req, res) => {
 };
 
 const confirmarTurno = async (req, res) => {
-  const connection = await conectarDBTurnos();
+  let connection;
   try {
+    connection = await conectarDBTurnos();
     const cuil = req.query.cuil;
     const apellido = req.query.apellido;
     const nombre = req.query.nombre;
@@ -504,8 +514,9 @@ const confirmarTurno = async (req, res) => {
 };
 
 const anularTurno = async (req, res) => {
-  const connection = await conectarDBTurnos();
+  let connection;
   try {
+    connection = await conectarDBTurnos();
     const cuil = req.query.cuil;
 
     // console.log(req.query);
@@ -531,8 +542,9 @@ const anularTurno = async (req, res) => {
 
 const usuarioExistente = async (req, res) => {
   // VERIFICA SI EXISTE USUARIO POR CORREO O CUIT EN BD_MUNI
-  const connection = await conectarBDEstadisticasMySql();
+  let connection;
   try {
+    connection = await conectarBDEstadisticasMySql();
     const { cuit_persona, email_persona } = req.query;
 
     const [resultEmailyCuit] = await connection.query(
@@ -566,8 +578,9 @@ const usuarioExistente = async (req, res) => {
 };
 
 const tipoUsuario = async (req, res) => {
-  const connection = await conectarBDEstadisticasMySql();
+  let connection;
   try {
+    connection = await conectarBDEstadisticasMySql();
     const { cuit_persona } = req.query;
 
     const [resultCuit] = await connection.query(
@@ -599,10 +612,11 @@ const tipoUsuario = async (req, res) => {
 };
 
 const guardarImagen = async (body, idReclamo) => {
-  const ftpClient = await conectarFTPCiudadano();
-  const { fileTypeFromBuffer } = await import("file-type");
+  let ftpClient;
 
   try {
+    ftpClient = await conectarFTPCiudadano();
+    const { fileTypeFromBuffer } = await import("file-type");
     const { foto } = body;
     const arrayFoto = Array.isArray(foto) ? foto : [foto];
 
@@ -815,11 +829,14 @@ const obtenerDatosCarnetSanidad = async (req, res) => {
 
   const cuilRegex = /^\d{11}$/;
   if (!cuilRegex.test(userCuil)) {
-    return res.status(400).json({ error: "Ingrese un número de CUIL válido." });
+    console.error("Ingrese un número de CUIL válido.");
+    return res
+      .status(400)
+      .json({ message: "Ingrese un número de CUIL válido." });
   }
-
-  const connection = await conectarBaseDeDatosSanidad();
+  let connection;
   try {
+    connection = await conectarBaseDeDatosSanidad();
     const dni = userCuil.toString().slice(2, -1);
 
     const query = `
@@ -877,16 +894,22 @@ const obtenerDatosCarnetSanidad = async (req, res) => {
         vencimiento: datos.fvencimiento_muestra,
         img: datos.img_foto,
       };
-      // console.log(ciudadano);
+      console.log(ciudadano);
       res.status(200).json({ ciudadano });
     } else {
+      console.error(`No se encontró carnet de sanidad para el DNI: ${dni}`);
       res.status(404).json({
-        results: `No se encontró carnet de sanidad para el DNI: ${dni}`,
+        message: `No se encontró carnet de sanidad para el DNI: ${dni}`,
       });
     }
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Error de servidor" });
+    res.status(500).json({ message: "Error de servidor" });
+  } finally {
+    // Cerrar la conexión a la base de datos
+    if (connection) {
+      await connection.close();
+    }
   }
 };
 
@@ -1460,6 +1483,11 @@ const restablecerClave = async (req, res) => {
     return res
       .status(500)
       .json({ message: error.message || "Algo salió mal :(" });
+  } finally {
+    // Cerrar la conexión a la base de datos
+    if (connection) {
+      await connection.end();
+    }
   }
 };
 
@@ -1522,6 +1550,11 @@ const editarClave = async (req, res) => {
     return res
       .status(500)
       .json({ message: error.message || "Algo salió mal :(" });
+  } finally {
+    // Cerrar la conexión a la base de datos
+    if (connection) {
+      await connection.end();
+    }
   }
 };
 
