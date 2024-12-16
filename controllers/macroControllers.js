@@ -31,11 +31,10 @@ const obtenerCategorias = async (req, res) => {
 
     if (results.length === 0) {
       return res.status(404).json({
-        message: "No se encontraron categorías habilitadas.",
+        message: "No se encontraron categorías cargadas o habilitadas.",
         ok: false,
       });
     }
-    // console.log(fields);
     // Enviar la respuesta
     res.status(200).json({ results });
 
@@ -70,12 +69,10 @@ const obtenerTiposDeReclamoPorCategoria = async (req, res) => {
     );
     if (results.length === 0) {
       return res.status(404).json({
-        message:
-          "No se encontraron tipos de reclamo para la categoría proporcionada.",
+        message: "No se encontraron solicitudes para la categoría seleccionada",
         ok: false,
       });
     }
-    // console.log(fields);
     // Enviar la respuesta
     res.status(200).json({ results });
 
@@ -117,7 +114,6 @@ const ingresarReclamo = async (req, res) => {
       foto,
     } = req.body;
     console.log("req.body", req.body);
-    // console.log("foto", foto?.length);
     console.log("Conectado a MySQL");
 
     const [tipoDeReclamoPerteneceACategoria] = await connection.execute(
@@ -202,12 +198,12 @@ const ingresarReclamo = async (req, res) => {
               console.log(resUpdateImage);
             } catch (error) {
               console.error("Error:", error);
-              res.status(500).json({ error: "Error de servidor imagenes" });
+              res.status(500).json({ error: "Error de servidor imagenes." });
             }
           }
 
           res.status(200).json({
-            message: "Reclamo generado con éxito",
+            message: "Solicitud ingresada con éxito al sistema.",
             Numero_Reclamo: reclamoId,
             Estado: "Iniciado",
             Repartición_Derivada: oficinaYReparticion[0].nombre_reparti,
@@ -215,12 +211,11 @@ const ingresarReclamo = async (req, res) => {
           });
         } else
           res.status(400).json({
-            message: "Este tipo de reclamo no está habilitado para derivación.",
+            message: "Esta solicitud no está habilitada para su derivación.",
           });
       } else {
         res.status(400).json({
-          message:
-            "Las coordenadas proporcionadas están fuera del rango permitido.",
+          message: "Revisar: las coordenadas brindadas están fuera del mapa.",
         });
       }
     } else {
@@ -231,7 +226,8 @@ const ingresarReclamo = async (req, res) => {
   } catch (error) {
     console.error("Error al ingresar reclamo:", error);
     res.status(500).json({
-      message: "Error interno del servidor.",
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
       ok: false,
     });
@@ -273,7 +269,7 @@ const listarReclamosCiudadano = async (req, res) => {
       } else {
         res.status(200).json({
           message:
-            "No se encontraron reclamos asociados al CUIT y al Teléfono proporcionados.",
+            "No se encontraron solicitudes asociadas al CUIL y al número de teléfono proporcionado.",
         });
       }
     } else if (cuit) {
@@ -287,7 +283,7 @@ const listarReclamosCiudadano = async (req, res) => {
       } else {
         res.status(200).json({
           message:
-            "No se encontraron reclamos asociados al CUIT proporcionado.",
+            "No se encontraron solicitudes asociadas al CUIL proporcionado.",
         });
       }
     } else if (telefono) {
@@ -301,20 +297,21 @@ const listarReclamosCiudadano = async (req, res) => {
       } else {
         res.status(200).json({
           message:
-            "No se encontraron reclamos asociados al Teléfono proporcionado.",
+            "No se encontraron solicitudes asociadas al número de teléfono proporcionado.",
         });
       }
     } else {
       res.status(400).json({
         message:
-          "Debe proporcionar al menos el CUIT o el Teléfono para buscar reclamos.",
+          "Por favor, ingrese al menos el CUIL o el númeor de teléfono para buscar su solicitud.",
       });
     }
     await connection.end();
   } catch (error) {
     console.error("Error al listar reclamos por ciudadano:", error);
     return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
       ok: false,
     });
@@ -359,17 +356,17 @@ const obtenerImagenes = async (idReclamo) => {
       await ftpClient.downloadTo(writableStream, remoteFilePath);
       const base64Image = `data:image/jpeg;base64,${buffer.toString("base64")}`;
       imagenesBase64.push(base64Image);
-      console.log(`Imagen ${imagen} obtenida correctamente`);
+      console.log(`Imagen ${imagen} obtenida correctamente.`);
     }
 
-    console.log("Todas las imágenes se obtuvieron correctamente");
+    console.log("Todas las imágenes se obtuvieron correctamente.");
     return imagenesBase64;
   } catch (error) {
     console.error("Error al obtener las imágenes:", error);
-    return { error: "Error al obtener las imágenes" };
+    return { error: "Error al obtener las imágenes." };
   } finally {
     await ftpClient.close();
-    console.log("Conexión FTP cerrada correctamente");
+    console.log("Conexión FTP cerrada correctamente.");
   }
 };
 
@@ -396,7 +393,7 @@ const buscarReclamoPorId = async (req, res) => {
       if (detalleMovimiento.length > 0) {
         reclamo[0].estado_reclamo = detalleMovimiento[0].nombre_estado;
       } else {
-        reclamo[0].estado_reclamo = "Estado no encontrado.";
+        reclamo[0].estado_reclamo = "Estado no encontrado";
       }
 
       console.log(reclamo[0].id_reclamo, ":)");
@@ -407,13 +404,12 @@ const buscarReclamoPorId = async (req, res) => {
     } else
       res
         .status(200)
-        .json({ message: "No se encontro un reclamo con ese id." });
+        .json({ message: "No se encontro un reclamo con este número de id." });
   } catch (error) {
-    console.error("Error al obtener reclamo por Id:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -436,17 +432,17 @@ const obtenerTurnosDisponiblesPorDia = async (req, res) => {
     [
       results[0].length > 0
         ? res.status(200).json(results[0])
-        : res.status(404).json({ message: "No hay turnos disponibles." }),
+        : res
+            .status(404)
+            .json({ message: "Lo sentimos: no existen turnos disponibles." }),
     ];
 
     console.log("Conexión cerrada");
   } catch (error) {
-    console.error("Error al obtener Turnos por día:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
-      error: error.message,
-      ok: false,
-    });
+    console.error("Error:", error);
+    res
+      .status(500)
+      .json({ message: "Error de servidor", error: error.message });
   } finally {
     // Cerrar la conexión a la base de datos
     if (connection) {
@@ -475,16 +471,16 @@ const obtenerTurnosDisponiblesPorHora = async (req, res) => {
         ? res.status(200).json(results[0])
         : res
             .status(404)
-            .json({ message: "No hay turnos disponiblesm para éste día." }),
+            .json({ message: "Lo sentimos: no existen turnos disponibles." }),
     ];
 
     console.log("Conexión cerrada");
   } catch (error) {
-    console.error("Error al obtener Turnos por hora:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    console.error("Error:", error);
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -499,7 +495,6 @@ const existeTurno = async (req, res) => {
   try {
     connection = await conectarDBTurnos();
     const cuil = req.query.cuil;
-    // console.log(cuil);
     console.log("Conectado a MySQL");
 
     let sqlQuery = `CALL api_existeturno(?,?)`;
@@ -510,11 +505,11 @@ const existeTurno = async (req, res) => {
 
     console.log("Conexión cerrada");
   } catch (error) {
-    console.error("Error al verificar existencia de turno:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    console.error("Error:", error);
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -534,7 +529,6 @@ const confirmarTurno = async (req, res) => {
     const fecha_solicitada = req.query.fecha_solicitada;
     const hora_solicitada = req.query.hora_solicitada;
 
-    // console.log(req.query);
     console.log("Conectado a MySQL");
 
     let sqlQuery = `SELECT api_confirmarturno(?, ?, ?, ?, ?, ?, ?  )`;
@@ -553,11 +547,11 @@ const confirmarTurno = async (req, res) => {
 
     console.log("Conexión cerrada");
   } catch (error) {
-    console.error("Error al confirmar Turno:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    console.error("Error:", error);
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -573,7 +567,6 @@ const anularTurno = async (req, res) => {
     connection = await conectarDBTurnos();
     const cuil = req.query.cuil;
 
-    // console.log(req.query);
     console.log("Conectado a MySQL");
     console.log(cuil);
     let sqlQuery = `SELECT api_anularturno(?, ?)`;
@@ -584,11 +577,11 @@ const anularTurno = async (req, res) => {
 
     console.log("Conexión cerrada");
   } catch (error) {
-    console.error("Error al anular turno:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    console.error("Error:", error);
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -612,24 +605,24 @@ const usuarioExistente = async (req, res) => {
     if (resultEmailyCuit.length > 0) {
       await connection.end();
       return res.status(400).json({
-        message: "Datos ya registrados.",
+        message: "Usuario ya registrado.",
         userEmail: resultEmailyCuit[0].email_persona,
         userCuit: resultEmailyCuit[0].documento_persona,
       });
     } else {
       await connection.end();
       return res.status(400).json({
-        message: "Datos no encontrados.",
+        message: "Nombre de Usuario no registrado.",
         userEmail: email_persona,
         userCuit: cuit_persona,
       });
     }
   } catch (error) {
-    console.error("Error verificar existencia de usuario:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    console.error("Error:", error);
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -655,7 +648,6 @@ const tipoUsuario = async (req, res) => {
       "SELECT nombre_tusuario FROM tipo_usuario WHERE id_tusuario = ?",
       [tipo]
     );
-    // console.log(tipo, "aaa", resultTipo, "bbb");
     await connection.end();
 
     return res.status(400).json({
@@ -663,11 +655,11 @@ const tipoUsuario = async (req, res) => {
       userTipoUsuario: resultTipo[0].nombre_tusuario,
     });
   } catch (error) {
-    console.error("Error al obtener Tipo de Usuario:", error);
-    return res.status(500).json({
-      message: "Error interno del servidor. Intente nuevamente más tarde.",
+    console.error("Error:", error);
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
-      ok: false,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -704,20 +696,19 @@ const guardarImagen = async (body, idReclamo) => {
       );
     }
 
-    console.log("Todas las imágenes se subieron correctamente");
+    console.log("Todas las imágenes se subieron correctamente.");
     return {
-      message: "Imágenes enviadas y subidas al servidor FTP correctamente",
+      message: "Imágenes enviadas y subidas al servidor FTP correctamente.",
     };
   } catch (error) {
     console.error("Error al guardar y subir las imágenes:", error);
-    return res.status(500).json({
-      message: "Error al guardar y subir las imágenes",
+    return {
+      message: "Error al guardar y subir las imágenes.",
       error: error.message,
-      ok: false,
-    });
+    };
   } finally {
     await ftpClient.close();
-    console.log("Conexión FTP cerrada correctamente");
+    console.log("Conexión FTP cerrada correctamente.");
   }
 };
 
@@ -744,15 +735,18 @@ const existeLoginApp = async (req, res) => {
       "SELECT * FROM persona WHERE documento_persona = ?  ",
       [userDNI]
     );
-    // console.log("QueryResult",queryResult)
     if (queryResult[0] == "") {
-      throw new CustomError("Usuario no encontrado", 400);
+      throw new CustomError("Nombre de Usuario no registrado.", 400);
     } else {
       const passOk = await bcrypt.compare(
         userPassword,
         queryResult[0][0].clave
       );
-      if (!passOk) throw new CustomError("Contraseña incorrecta", 400);
+      if (!passOk)
+        throw new CustomError(
+          "Contraseña incorrecta: verifíquela e ingrese nuevamente.",
+          400
+        );
     }
 
     const tokenIngreso = jwt.sign(
@@ -790,19 +784,24 @@ const existeLoginApp = async (req, res) => {
 
       if (ciudadano.length > 0) {
         res.status(200).json({
-          message: "Ingreso correcto.",
+          message: "Ingreso correcto",
           ok: true,
           ciudadano,
           tokenIngreso,
         });
       } else {
-        res.status(200).json({ message: "Usuario no encontrado." });
+        res.status(200).json({ message: "Nombre de Usuario no registrado." });
       }
     } else {
-      res.status(200).json({ message: "Usuario no encontrado." });
+      res.status(200).json({ message: "Nombre de Usuario no registrado." });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message || "Algo salió mal :(" });
+    console.error("Error al Ingresar al Login:", error);
+    res.status(500).json({
+      message:
+        "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+      error: error.message,
+    });
   } finally {
     // Cerrar la conexión a la base de datos
     if (connection) {
@@ -812,12 +811,9 @@ const existeLoginApp = async (req, res) => {
 };
 const obtenerTokenAutorizacion = async (req, res) => {
   try {
-    // console.log(req.query);
     const tokenIngreso = req.query.tokenIngreso;
     if (!tokenIngreso) {
-      return res
-        .status(400)
-        .json({ message: "Token de ingreso no proporcionado" });
+      return res.status(400).json({ message: "Token de acceso no ingresado." });
     }
 
     const decoded = jwt.verify(
@@ -834,10 +830,9 @@ const obtenerTokenAutorizacion = async (req, res) => {
     );
     res.status(200).json({ tokenAutorizacion });
   } catch (error) {
-    console.log("Error al generar token de autorización:", error);
     res.status(500).json({
-      message:
-        "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+      message: "Error al generar el token de autorización",
+      error: error.message,
     });
   }
 };
@@ -879,7 +874,6 @@ const credencial = async (req, res) => {
         const qrCodeDataUrl = await QRCode.toDataURL(
           `https://ciudaddigital.smt.gob.ar/#/verificacion/${userCuil}`
         );
-        //console.log(qrCodeDataUrl);
         ciudadano.imagen = imagen;
         ciudadano.qr = qrCodeDataUrl;
 
@@ -891,7 +885,7 @@ const credencial = async (req, res) => {
       }
     } else {
       res.status(404).json({
-        message: "El usuario no está habilitado o no existe en el sistema.",
+        message: "Usuario inexistente en el sistema.",
       });
     }
   } catch (error) {
@@ -904,13 +898,13 @@ const credencial = async (req, res) => {
     } else if (error.code === "ER_ACCESS_DENIED_ERROR") {
       res.status(500).json({
         error:
-          "Acceso denegado a la base de datos. Verifique las credenciales.",
+          "Acceso denegado a la base de datos. Verifique los datos ingresados.",
       });
     } else {
-      console.log("Error al encontrar credencial:", error);
       res.status(500).json({
         message:
-          "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+          "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
+        error: error.message,
       });
     }
   }
@@ -923,7 +917,7 @@ const obtenerDatosCarnetSanidad = async (req, res) => {
   if (!cuilRegex.test(userCuil)) {
     console.error("El número de CUIL debe ser válido y contener 11 dígitos.");
     return res.status(400).json({
-      message: "El número de CUIL debe ser válido y contener 11 dígitos.",
+      message: "El número de CUIL no es válido.",
     });
   }
   let connection;
@@ -1000,7 +994,8 @@ const obtenerDatosCarnetSanidad = async (req, res) => {
     console.error("Error al procesar el carnet de sanidad:", error);
     res.status(500).json({
       message:
-        "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
+      error: error.message,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -1034,49 +1029,6 @@ const validarEmpleado = async (cuil) => {
   }
 };
 
-// const transporter = nodemailer.createTransport({
-//   // host: 'smtp.gmail.com',
-//   service: "gmail",
-//   // port: 465,
-//   // secure: true,
-//   auth: {
-//     user: "no-reply-cdigital@smt.gob.ar",
-//     pass: process.env.PASSWORD_MAIL,
-//   },
-// });
-
-// const enviarEmail = (codigo, email, cuil) => {
-//   try {
-//     const mailOptions = {
-//       from: "SMT-Ciudadano Digital <no-reply-cdigital@smt.gob.ar>",
-//       to: email,
-//       subject: "Código de validación",
-//       // text: `Tu código de validación es: ${codigo}. Para visualizar su credencial de Ciudadano Digital ingrese al siguiente link: https://ciudaddigital.smt.gob.ar/#/credencialesCiudadano/${cuil}`,
-//       html: `<p>Tu código de validación es: <strong style="font-size: 24px;">${codigo}</strong></p>`,
-//     };
-
-//     transporter.sendMail(mailOptions, (errorEmail, info) => {
-//       if (errorEmail) {
-//         console.log("error al enviar correo");
-//         // return res.status(500).json({ mge: 'Error al enviar el correo electrónico:', ok: false, error: errorEmail });
-//       } else {
-//         // return res.status(200).json({mge:'Correo electrónico enviado correctamente:',ok: true});
-//         console.log("email enviado");
-//       }
-//     });
-//   } catch (error) {
-//     console.log("error al enviar email");
-//   }
-// };
-
-// const generarCodigo = (numero) => {
-//   const numeroInvertido = parseInt(
-//     numero.toString().split("").reverse().join("")
-//   );
-//   const ultimosCuatroDigitos = numeroInvertido % 10000;
-//   return ultimosCuatroDigitos;
-// };
-
 const agregarUsuario = async (req, res) => {
   //PUSH CUANDO SE LOGUEA CON OTRO METODO NO CIDITUC
   let connection;
@@ -1104,17 +1056,17 @@ const agregarUsuario = async (req, res) => {
 
     const fechaStr = fecha_nacimiento_persona;
     if (!fechaStr) {
-      throw new Error("La fecha de nacimiento es requerida.");
+      throw new Error("Debe ingresar la fecha de nacimiento.");
     }
     const fechaFormateada = moment(fechaStr, "YYYY-MM-DD", true).isValid()
       ? moment(fechaStr).format("YYYY-MM-DD")
       : null;
 
     if (!fechaFormateada) {
-      throw new Error("Formato de fecha no válido. Usa 'YYYY-MM-DD'.");
+      throw new Error(
+        "Formato de fecha no válido.Por favor, usar el formato año/mes/dia. Por ejemplo: '2024-08-24'."
+      );
     }
-
-    // const codigoValidacion = generarCodigo(documento_persona);
 
     connection = await conectarBDEstadisticasMySql();
 
@@ -1236,13 +1188,17 @@ const agregarUsuario = async (req, res) => {
     //enviarEmail(codigoValidacion, email_persona, documento_persona);
 
     await connection.end();
-    res.status(200).json({ message: "Ciudadano creado con éxito", ok: true });
+    res.status(200).json({
+      message: "Bienvenido: creó su cuenta de Ciudadano Digital.",
+      ok: true,
+    });
   } catch (error) {
     console.log("Error al agregar usuario:", error);
     res.status(500).json({
+      message: error.message,
       message:
-        error.message ||
-        "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
+      error: error.message,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -1298,6 +1254,12 @@ const enviarEmail = (codigo, email, cuil) => {
     });
   } catch (error) {
     console.log("error al enviar email");
+
+    res.status(500).json({
+      message:
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
+      error: error.message,
+    });
   }
 };
 
@@ -1325,14 +1287,16 @@ const registroUsuario = async (req, res) => {
 
     const fechaStr = fecha_nacimiento_persona;
     if (!fechaStr) {
-      throw new Error("La fecha de nacimiento es requerida.");
+      throw new Error("Debe ingresar la fecha de nacimiento.");
     }
     const fechaFormateada = moment(fechaStr, "YYYY-MM-DD", true).isValid()
       ? moment(fechaStr).format("YYYY-MM-DD")
       : null;
 
     if (!fechaFormateada) {
-      throw new Error("Formato de fecha no válido. Usa 'YYYY-MM-DD'.");
+      throw new Error(
+        "Formato de fecha no válido.Por favor, usar el formato año/mes/dia. Por ejemplo: '2024-08-24'."
+      );
     }
 
     const codigoValidacion = generarCodigo(cuil);
@@ -1426,7 +1390,7 @@ const registroUsuario = async (req, res) => {
       await transaction.commit();
     } else {
       // No se encontró un legajo
-      console.log("No se encontró un legajo");
+      console.log("No se encontró un legajo.");
       // Insertar el nuevo usuario
       const [resultInsert] = await connection.query(
         "INSERT INTO persona (documento_persona, nombre_persona, apellido_persona, email_persona, clave, telefono_persona, domicilio_persona, id_provincia, id_pais, localidad_persona, validado, habilita, fecha_nacimiento_persona, id_genero) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,  ?, ?, ?)",
@@ -1452,12 +1416,17 @@ const registroUsuario = async (req, res) => {
     enviarEmail(codigoValidacion, email_persona, cuil);
 
     await connection.end();
-    res.status(200).json({ message: "Ciudadano creado con éxito.", ok: true });
+    res
+      .status(200)
+      .json({
+        message: "Bienvenido: creó tu cuenta de Ciudadano Digital.",
+        ok: true,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({
+      error: error.message,
       message:
-        error.message ||
         "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
     });
   } finally {
@@ -1476,7 +1445,7 @@ const validarUsuario = async (req, res) => {
     if (!email_persona || !codigo_verif) {
       return res.status(400).json({
         message:
-          "El correo electrónico y el código de verificación son obligatorios.",
+          "Atención: el correo electrónico y el código de verificación son obligatorios.",
         ok: false,
       });
     }
@@ -1507,11 +1476,11 @@ const validarUsuario = async (req, res) => {
           await connection.end();
           return res
             .status(200)
-            .json({ message: "Usuario validado con éxito.", ok: true });
+            .json({ message: "Usuario verificado con éxito.", ok: true });
         } else {
           await connection.end();
           return res.status(200).json({
-            message: "El código de verificación es incorrecto.",
+            message: "Atención: el código de verificación es incorrecto",
             ok: false,
           });
         }
@@ -1519,7 +1488,7 @@ const validarUsuario = async (req, res) => {
         await connection.end();
         return res
           .status(200)
-          .json({ message: "El usuario ya está validado.", ok: false });
+          .json({ message: "Este usuario ya está verificado.", ok: false });
       }
     } else {
       await connection.end();
@@ -1534,6 +1503,7 @@ const validarUsuario = async (req, res) => {
       message:
         "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
       ok: false,
+      error: error.message,
     });
   } finally {
     // Cerrar la conexión a la base de datos
@@ -1584,7 +1554,7 @@ const restablecerClave = async (req, res) => {
         await connection.end();
         return res.status(200).json({
           message:
-            "¡Usuario no validado! El usuario debe estar validado para poder restablecer su clave.",
+            "¡Usuario no verificado! El usuario debe estar verificado para poder restablecer su clave.",
           ok: false,
         });
       }
@@ -1599,7 +1569,7 @@ const restablecerClave = async (req, res) => {
         from: "SMT-Ciudadano Digital <no-reply-cdigital@smt.gob.ar>", // Coloca tu dirección de correo electrónico
         to: email, // Utiliza el correo electrónico del usuario recién registrado
         subject: "Restablecer Clave",
-        text: `Tu nueva clave temporal es: ${clave_nueva}. Recuerda cambiarla después de iniciar sesión`,
+        text: `Tu nueva clave temporal es: ${clave_nueva}. Recuerda cambiarla después de iniciar sesión.`,
       };
 
       transporter.sendMail(mailOptions, (errorEmail, info) => {
@@ -1610,7 +1580,7 @@ const restablecerClave = async (req, res) => {
           });
         } else {
           return res.status(200).json({
-            message: `Se envió un email a ${email} con una clave temporal`,
+            message: `Se envió un email a ${email} con una clave temporal.`,
             ok: true,
           });
         }
@@ -1626,7 +1596,7 @@ const restablecerClave = async (req, res) => {
     console.error("Error en restablecerClave:", error);
     return res.status(500).json({
       message:
-        "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
       ok: false,
     });
@@ -1682,13 +1652,13 @@ const editarClave = async (req, res) => {
         await connection.end();
         return res
           .status(200)
-          .json({ message: "Clave modificada con éxito.", ok: true });
+          .json({ message: "La clave fue modificada correctamente", ok: true });
       } else {
         // El usuario ya está validado
         await connection.end();
         return res.status(200).json({
           message:
-            "¡Usuario no validado! El usuario debe estar validado para poder cambiar su clave.",
+            "¡Usuario no verificado! La clave puede ser cambiada sólo por un usuario verificado.",
           ok: false,
         });
       }
@@ -1703,7 +1673,7 @@ const editarClave = async (req, res) => {
     console.error("Error en editarClave:", error);
     return res.status(500).json({
       message:
-        "Ocurrió un error interno del servidor. Intente nuevamente más tarde.",
+        "Error interno del servidor. Por favor, aguarde unos minutos e intente nuevamente.",
       error: error.message,
       ok: false,
     });
