@@ -6,7 +6,7 @@ const Oauth = async (req, res, next) => {
     let token = req.query.tokenAutorizacion || req.body.tokenAutorizacion;
 
     if (!token) {
-      throw new Error("Token not provided");
+      throw new Error("Token no proporcionado.");
     }
 
     console.log("OAuth req.query", req.query);
